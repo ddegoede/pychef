@@ -56,7 +56,7 @@ class ChefAPI(object):
     env_value_re = re.compile(r'ENV\[(.+)\]')
     ruby_string_re = re.compile(r'^\s*(["\'])(.*?)\1\s*$')
 
-    def __init__(self, url, key, client, version='0.10.8', headers={}, ssl_verify=True):
+    def __init__(self, url, key, client, timeout, version='0.10.8', headers={}, ssl_verify=True):
         self.url = url.rstrip('/')
         self.parsed_url = six.moves.urllib.parse.urlparse(self.url)
         if not isinstance(key, Key):
@@ -65,6 +65,7 @@ class ChefAPI(object):
             raise ValueError("ChefAPI attribute 'key' was invalid.")
         self.key = key
         self.client = client
+        self.timeout = timeout
         self.version = version
         self.headers = dict((k.lower(), v) for k, v in six.iteritems(headers))
         self.version_parsed = pkg_resources.parse_version(self.version)
@@ -188,7 +189,7 @@ class ChefAPI(object):
         del api_stack_value()[-1]
 
     def _request(self, method, url, data, headers):
-        return requests.api.request(method, url, headers=headers, data=data, verify=self.ssl_verify)
+        return requests.api.request(method, url, headers=headers, data=data, verify=self.ssl_verify, timeout=self.timeout)
 
     def request(self, method, path, headers={}, data=None):
         auth_headers = sign_request(key=self.key, http_method=method,
@@ -205,6 +206,9 @@ class ChefAPI(object):
                 (k.capitalize(), v) for k, v in six.iteritems(request_headers)))
         except requests.ConnectionError as e:
             raise ChefServerError(e.message)
+        except requests.Timeout as e:
+            raise ChefServerError(e)
+
 
         if not response.ok:
             raise ChefServerError.from_error(response.reason, code=response.status_code)
