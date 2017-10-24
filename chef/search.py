@@ -44,20 +44,36 @@ class Search(collections.Sequence):
             print row.object.name
     
     .. versionadded:: 0.1
+
+    You can also do partial searches if you are using chef server >= 12.
+
+    Example::
+        keys = {
+            'name' : ['name'],
+            'ip' : ['ipaddress'],
+            'kernel_name' : ['kernel', 'name']
+        }
+
+        for row in Search('node', 'roles:app', filter_result=keys):
+            print row['data']['kernel_name']
     """
 
     url = '/search'
 
-    def __init__(self, index, q='*:*', rows=1000, start=0, api=None):
+    def __init__(self, index, q='*:*', rows=1000, start=0, api=None, filter_result=None):
         self.name = index
         self.api = api or ChefAPI.get_global()
         self._args = dict(q=q, rows=rows, start=start)
         self.url = self.__class__.url + '/' + self.name + '?' + six.moves.urllib.parse.urlencode(self._args)
+        self._filter_result = filter_result
 
     @property
     def data(self):
         if not hasattr(self, '_data'):
-            self._data = self.api[self.url]
+            if not self._filter_result:
+                self._data = self.api[self.url]
+            else:
+                self._data = self.api.api_request('POST', self.url, data=self._filter_result)
         return self._data
 
     @property
