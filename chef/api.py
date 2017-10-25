@@ -56,7 +56,7 @@ class ChefAPI(object):
     env_value_re = re.compile(r'ENV\[(.+)\]')
     ruby_string_re = re.compile(r'^\s*(["\'])(.*?)\1\s*$')
 
-    def __init__(self, url, key, client, timeout, version='0.10.8', headers={}, ssl_verify=True):
+    def __init__(self, url, key, client, timeout=None, version='0.10.8', headers={}, ssl_verify=True):
         self.url = url.rstrip('/')
         self.parsed_url = six.moves.urllib.parse.urlparse(self.url)
         if not isinstance(key, Key):
