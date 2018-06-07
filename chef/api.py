@@ -205,7 +205,7 @@ class ChefAPI(object):
             response = self._request(method, self.url + path, data, dict(
                 (k.capitalize(), v) for k, v in six.iteritems(request_headers)))
         except requests.ConnectionError as e:
-            raise ChefServerError(e.message)
+            raise ChefServerError(str(e))
         except requests.Timeout as e:
             raise ChefServerError(e)
 
