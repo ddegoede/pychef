@@ -5,17 +5,17 @@ import os
 from setuptools import setup, find_packages
 
 setup(
-    name = 'PyChef',
-    version = '0.4.2+criteo',
-    packages = find_packages(),
-    author = 'Noah Kantrowitz',
-    author_email = 'noah@coderanger.net',
-    description = 'Python implementation of a Chef API client.',
-    long_description = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
-    license = 'Apache 2.0',
-    keywords = '',
-    url = 'http://github.com/coderanger/pychef',
-    classifiers = [
+    name='PyChef',
+    version='0.5.0',
+    packages=find_packages(),
+    author='Noah Kantrowitz',
+    author_email='noah@coderanger.net',
+    description='Python implementation of a Chef API client.',
+    long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
+    license='Apache 2.0',
+    keywords='',
+    url='https://github.com/coderanger/pychef',
+    classifiers=[
         #'Development Status :: 1 - Planning',
         #'Development Status :: 2 - Pre-Alpha',
         #'Development Status :: 3 - Alpha',
@@ -28,8 +28,8 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
     ],
-    zip_safe = False,
-    install_requires = ['requests>=2.7.0'],
-    tests_require = ['unittest2', 'mock'],
-    test_suite = 'unittest2.collector',
+    zip_safe=False,
+    install_requires=['requests>=2.7.0'],
+    tests_require=['unittest', 'mock'],
+    test_suite='unittest.collector',
 )

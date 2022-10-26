@@ -1,6 +1,6 @@
 sudo: false
 language: python
 python:
-  - 3.6
+  - 3.10
 install: pip install -e .
 script:  python setup.py test

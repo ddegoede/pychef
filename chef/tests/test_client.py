@@ -1,9 +1,8 @@
-import unittest2
-
 from chef import Client
-from chef.tests import ChefTestCase
+from chef.tests import TestChef
 
-class ClientTestCase(ChefTestCase):
+
+class ClientTestCase(TestChef):
     def test_list(self):
         self.assertIn('test_1', Client.list())
 
@@ -20,7 +19,7 @@ class ClientTestCase(ChefTestCase):
         client = Client.create(name)
         self.register(client)
         self.assertEqual(client.name, name)
-        #self.assertEqual(client.orgname, 'pycheftest') # See CHEF-2019
+        # self.assertEqual(client.orgname, 'pycheftest') # See CHEF-2019
         self.assertTrue(client.private_key)
         self.assertTrue(client.public_key)
         self.assertIn(name, Client.list())

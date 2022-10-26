@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import pkg_resources
+# import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -46,14 +48,13 @@ copyright = u'2010-2012, Noah Kantrowitz'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-import pkg_resources
 try:
     release = pkg_resources.get_distribution('PyChef').version
 except pkg_resources.DistributionNotFound:
-    print 'To build the documentation, The distribution information of PyChef'
-    print 'Has to be available.  Either install the package into your'
-    print 'development environment or run "setup.py develop" to setup the'
-    print 'metadata.  A virtualenv is recommended!'
+    print('To build the documentation, The distribution information of PyChef')
+    print('Has to be available.  Either install the package into your')
+    print('development environment or run "setup.py develop" to setup the')
+    print('metadata.  A virtualenv is recommended!')
     sys.exit(1)
 del pkg_resources
 

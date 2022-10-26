@@ -1,8 +1,9 @@
 from chef import Environment
 from chef.exceptions import ChefAPIVersionError
-from chef.tests import ChefTestCase, test_chef_api
+from chef.tests import TestChef, test_chef_api
 
-class EnvironmentTestCase(ChefTestCase):
+
+class EnvironmentTestCase(TestChef):
     def test_version_error_list(self):
         with test_chef_api(version='0.9.0'):
             with self.assertRaises(ChefAPIVersionError):

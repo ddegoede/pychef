@@ -1,5 +1,3 @@
-import functools
-
 from chef.api import ChefAPI, autoconfigure
 from chef.environment import Environment
 from chef.exceptions import ChefError, ChefAPIVersionError
@@ -22,6 +20,7 @@ DEFAULT_HOSTNAME_ATTR = ['cloud.public_hostname', 'fqdn']
 
 # Sentinel object to trigger defered lookup
 _default_environment = object()
+
 
 def _api(api):
     api = api or ChefAPI.get_global() or autoconfigure()
@@ -56,12 +55,12 @@ class Roledef(object):
                 else:
                     for attr in self.hostname_attr:
                         try:
-                            val =  row.object.attributes.get_dotted(attr)
-                            if val: # Don't ever give out '' or None, since it will error anyway
+                            val = row.object.attributes.get_dotted(attr)
+                            if val:  # Don't ever give out '' or None, since it will error anyway
                                 yield val
                                 break
                         except KeyError:
-                            pass # Move on to the next
+                            pass  # Move on to the next
                     else:
                         raise ChefError('Cannot find a usable hostname attribute for node %s', row.object)
 
@@ -110,7 +109,7 @@ def chef_roledefs(api=None, hostname_attr=DEFAULT_HOSTNAME_ATTR, environment=_de
     roledefs = {}
     for row in Search('role', api=api):
         name = row['name']
-        roledefs[name] =  Roledef('roles:%s' % name, api, hostname_attr, environment)
+        roledefs[name] = Roledef('roles:%s' % name, api, hostname_attr, environment)
     return roledefs
 
 
@@ -191,5 +190,5 @@ def chef_tags(*tags, **kwargs):
     # Allow passing a single iterable
     if len(tags) == 1 and not isinstance(tags[0], str):
         tags = tags[0]
-    query = ' AND '.join('tags:%s'%tag.strip() for tag in tags)
+    query = ' AND '.join('tags:%s' % tag.strip() for tag in tags)
     return chef_query(query, **kwargs)

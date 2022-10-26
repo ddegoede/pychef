@@ -1,9 +1,10 @@
-import collections
+from collections.abc import MutableMapping, Sequence
 
 from chef.base import ChefObject
 from chef.exceptions import ChefError
 
-class NodeAttributes(collections.abc.MutableMapping):
+
+class NodeAttributes(MutableMapping):
     """A collection of Chef :class:`~chef.Node` attributes.
 
     Attributes can be accessed like a normal python :class:`dict`::
@@ -18,7 +19,7 @@ class NodeAttributes(collections.abc.MutableMapping):
     """
 
     def __init__(self, search_path=[], path=None, write=None):
-        if not isinstance(search_path, collections.abc.Sequence):
+        if not isinstance(search_path, Sequence):
             search_path = [search_path]
         self.search_path = search_path
         self.path = path or ()
@@ -31,10 +32,10 @@ class NodeAttributes(collections.abc.MutableMapping):
         return iter(keys)
 
     def __len__(self):
-        l = 0
-        for key in self:
-            l += 1
-        return l
+        length = 0
+        for _key in self:
+            length += 1
+        return length
 
     def __getitem__(self, key):
         for d in self.search_path:
@@ -199,7 +200,7 @@ class Node(ChefObject):
     }
 
     def has_key(self, key):
-      return self.attributes.has_dotted(key)
+        return self.attributes.has_dotted(key)
 
     def get(self, key, default=None):
         return self.attributes.get(key, default)
@@ -219,7 +220,7 @@ class Node(ChefObject):
         super(Node, self)._populate(data)
         self.attributes = NodeAttributes((data.get('automatic', {}),
                                           data.get('override', {}),
-                                          data['normal'], # Must exist, see above
+                                          data['normal'],  # Must exist, see above
                                           data.get('default', {})), write=data['normal'])
 
     def cookbooks(self, api=None):

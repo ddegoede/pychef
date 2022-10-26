@@ -1,12 +1,11 @@
 import os
-
 import mock
-import unittest2
+from unittest import TestCase
 
 from chef.api import ChefAPI
 
 
-class APITestCase(unittest2.TestCase):
+class TestAPI(TestCase):
     def load(self, path):
         path = os.path.join(os.path.dirname(__file__), 'configs', path)
         return ChefAPI.from_config_file(path)

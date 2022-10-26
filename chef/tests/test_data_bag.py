@@ -1,8 +1,8 @@
 from chef import DataBag, DataBagItem, Search
-from chef.exceptions import ChefError
-from chef.tests import ChefTestCase
+from chef.tests import TestChef
 
-class DataBagTestCase(ChefTestCase):
+
+class TestDataBag(TestChef):
     def test_list(self):
         bags = DataBag.list()
         self.assertIn('test_1', bags)
@@ -10,8 +10,8 @@ class DataBagTestCase(ChefTestCase):
 
     def test_keys(self):
         bag = DataBag('test_1')
-        self.assertItemsEqual(list(bag.keys()), ['item_1', 'item_2'])
-        self.assertItemsEqual(iter(bag), ['item_1', 'item_2'])
+        self.assertCountEqual(list(bag.keys()), ['item_1', 'item_2'])
+        self.assertCountEqual(iter(bag), ['item_1', 'item_2'])
 
     def test_item(self):
         bag = DataBag('test_1')
@@ -26,7 +26,7 @@ class DataBagTestCase(ChefTestCase):
         self.assertIn('item_2', q)
         self.assertEqual(q['item_1']['raw_data']['test_attr'], 1)
         item = q['item_1'].object
-        self.assertIsInstance(item, DataBagItem)
+        self.assertTrue(isinstance(item, DataBagItem))
         self.assertEqual(item['test_attr'], 1)
 
     def test_direct_item(self):
@@ -58,7 +58,7 @@ class DataBagTestCase(ChefTestCase):
         self.assertIn(item_name, bag)
         bag2 = DataBag(bag_name)
         self.assertIn(item_name, bag2)
-        item2 = bag2[item_name]
+        item = bag2[item_name]
         self.assertIn('foo', item)
         self.assertEqual(item['foo'], value)
 

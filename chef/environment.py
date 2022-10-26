@@ -1,5 +1,6 @@
 from chef.base import ChefObject
 
+
 class Environment(ChefObject):
     """A Chef environment object.
 
