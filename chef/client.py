@@ -1,10 +1,13 @@
 from chef.api import ChefAPI
 from chef.base import ChefObject
 
+
 class Client(ChefObject):
     """A Chef client object."""
 
     url = '/clients'
+
+    private_key = None
 
     def _populate(self, data):
         self.platform = self.api and self.api.platform

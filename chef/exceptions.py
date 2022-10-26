@@ -7,7 +7,7 @@ class ChefError(Exception):
 
 
 class ChefServerError(ChefError):
-    """An error from a Chef server. May include a HTTP response code."""
+    """An error from a Chef server may include an HTTP response code."""
 
     def __init__(self, message, code=None):
         self.raw_message = message
@@ -34,4 +34,3 @@ class ChefAPIVersionError(ChefError):
 
 class ChefObjectTypeError(ChefError):
     """An invalid object type error"""
-

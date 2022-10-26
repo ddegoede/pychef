@@ -1,4 +1,4 @@
-import collections
+from collections.abc import Mapping
 
 import pkg_resources
 from chef.acl import Acl
@@ -6,7 +6,8 @@ from chef.acl import Acl
 from chef.api import ChefAPI
 from chef.exceptions import *
 
-class ChefQuery(collections.abc.Mapping):
+
+class ChefQuery(Mapping):
     def __init__(self, obj_class, names, api):
         self.obj_class = obj_class
         self.names = names
@@ -23,7 +24,7 @@ class ChefQuery(collections.abc.Mapping):
 
     def __getitem__(self, name):
         if name not in self:
-            raise KeyError('%s not found'%name)
+            raise KeyError('%s not found' % name)
         return self.obj_class(name, api=self.api)
 
 
@@ -105,7 +106,7 @@ class ChefObject(metaclass=ChefObjectMeta):
         api = api or self.api
         try:
             api.api_request('PUT', self.url, data=self)
-        except ChefServerNotFoundError as e:
+        except ChefServerNotFoundError:
             # If you get a 404 during a save, just create it instead
             # This mirrors the logic in the Chef code
             api.api_request('POST', self.__class__.url, data=self)
@@ -129,7 +130,7 @@ class ChefObject(metaclass=ChefObjectMeta):
         return self.name
 
     def __repr__(self):
-        return '<%s %s>'%(type(self).__name__, self)
+        return '<%s %s>' % (type(self).__name__, self)
 
     @classmethod
     def _check_api_version(cls, api):

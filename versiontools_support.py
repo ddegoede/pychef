@@ -122,10 +122,10 @@ class VersiontoolsEnchancedDistributionMetadata(distutils.dist.DistributionMetad
         """
         Raise an informative exception
         """
-        raise SystemExit(
-"""This package requires versiontools for development or testing.
+        raise SystemExit("""
+This package requires versiontools for development or testing.
 
-See http://versiontools.readthedocs.org/ for more information about
+See https://versiontools.readthedocs.org/ for more information about
 what versiontools is and why it is useful.
 
 To install versiontools now please run:
@@ -140,6 +140,6 @@ the documentation for a full list of required modules.""")
 # VersiontoolsEnhancedDistributionMetadata then monkey patch it. This should
 # prevent a (odd) case of multiple imports of this module.
 if not issubclass(
-    distutils.dist.DistributionMetadata,
-    VersiontoolsEnchancedDistributionMetadata):
+        distutils.dist.DistributionMetadata,
+        VersiontoolsEnchancedDistributionMetadata):
     distutils.dist.DistributionMetadata = VersiontoolsEnchancedDistributionMetadata

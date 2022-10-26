@@ -1,9 +1,10 @@
 import abc
-import collections
+from collections.abc import MutableMapping
 
 from chef.api import ChefAPI
 from chef.base import ChefObject, ChefQuery, ChefObjectMeta
 from chef.exceptions import ChefError, ChefServerNotFoundError
+
 
 class DataBagMeta(ChefObjectMeta, abc.ABCMeta):
     """A metaclass to allow DataBag to use multiple inheritance."""
@@ -31,7 +32,7 @@ class DataBag(ChefObject, ChefQuery, metaclass=DataBagMeta):
         return DataBagItem(self, name, api=api)
 
 
-class DataBagItem(ChefObject, collections.abc.MutableMapping, metaclass=DataBagMeta):
+class DataBagItem(ChefObject, MutableMapping, metaclass=DataBagMeta):
     """A Chef data bag item object.
 
     Data bag items act as normal dicts and can contain arbitrary data.
@@ -113,5 +114,5 @@ class DataBagItem(ChefObject, collections.abc.MutableMapping, metaclass=DataBagM
         self['id'] = self.name
         try:
             api.api_request('PUT', self.url, data=self.raw_data)
-        except ChefServerNotFoundError as e:
+        except ChefServerNotFoundError:
             api.api_request('POST', self.__class__.url+'/'+str(self._bag), data=self.raw_data)

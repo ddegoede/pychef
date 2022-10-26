@@ -3,7 +3,7 @@ import random
 from functools import wraps
 
 import mock
-from unittest2 import TestCase, skipUnless
+from unittest import TestCase, skipUnless
 
 from chef.api import ChefAPI
 from chef.exceptions import ChefError
@@ -11,8 +11,10 @@ from chef.search import Search
 
 TEST_ROOT = os.path.dirname(os.path.abspath(__file__))
 
+
 def skipSlowTest():
     return skipUnless(os.environ.get('PYCHEF_SLOW_TESTS'), 'slow tests skipped, set $PYCHEF_SLOW_TESTS=1 to enable')
+
 
 class mockSearch(object):
     def __init__(self, search_data):
@@ -37,11 +39,11 @@ def test_chef_api(**kwargs):
     return ChefAPI('https://api.opscode.com/organizations/pycheftest', os.path.join(TEST_ROOT, 'client.pem'), 'unittests', **kwargs)
 
 
-class ChefTestCase(TestCase):
+class TestChef(TestCase):
     """Base class for Chef unittests."""
 
     def setUp(self):
-        super(ChefTestCase, self).setUp()
+        super(TestChef, self).setUp()
         self.api = test_chef_api()
         self.api.set_default()
         self.objects = []

@@ -7,33 +7,34 @@ if sys.platform == 'win32' or sys.platform == 'cygwin':
 else:
     _eay = CDLL(find_library('crypto'))
 
-#unsigned long ERR_get_error(void);
+# unsigned long ERR_get_error(void);
 ERR_get_error = _eay.ERR_get_error
 ERR_get_error.argtypes = []
 ERR_get_error.restype = c_ulong
 
-#void ERR_error_string_n(unsigned long e, char *buf, size_t len);
+# void ERR_error_string_n(unsigned long e, char *buf, size_t len);
 ERR_error_string_n = _eay.ERR_error_string_n
 ERR_error_string_n.argtypes = [c_ulong, c_char_p, c_size_t]
 ERR_error_string_n.restype = None
+
 
 class SSLError(Exception):
     """An error in OpenSSL."""
 
     def __init__(self, message, *args):
-        message = message%args
+        message = message % args
         err = ERR_get_error()
         if err:
             message += ':'
         while err:
             buf = create_string_buffer(120)
             ERR_error_string_n(err, buf, 120)
-            message += '\n%s'%string_at(buf, 119)
+            message += '\n%s' % string_at(buf, 119)
             err = ERR_get_error()
         super(SSLError, self).__init__(message)
 
 
-#BIO *   BIO_new(BIO_METHOD *type);
+# BIO *   BIO_new(BIO_METHOD *type);
 BIO_new = _eay.BIO_new
 BIO_new.argtypes = [c_void_p]
 BIO_new.restype = c_void_p
@@ -43,69 +44,78 @@ BIO_new_mem_buf = _eay.BIO_new_mem_buf
 BIO_new_mem_buf.argtypes = [c_void_p, c_int]
 BIO_new_mem_buf.restype = c_void_p
 
-#BIO_METHOD *BIO_s_mem(void);
+# BIO_METHOD *BIO_s_mem(void);
 BIO_s_mem = _eay.BIO_s_mem
 BIO_s_mem.argtypes = []
 BIO_s_mem.restype = c_void_p
 
-#long    BIO_ctrl(BIO *bp,int cmd,long larg,void *parg);
+# long    BIO_ctrl(BIO *bp,int cmd,long larg,void *parg);
 BIO_ctrl = _eay.BIO_ctrl
 BIO_ctrl.argtypes = [c_void_p, c_int, c_long, c_void_p]
 BIO_ctrl.restype = c_long
 
-#define BIO_CTRL_RESET          1  /* opt - rewind/zero etc */
+# define BIO_CTRL_RESET          1  /* opt - rewind/zero etc */
 BIO_CTRL_RESET = 1
-##define BIO_CTRL_INFO           3  /* opt - extra tit-bits */
+# #define BIO_CTRL_INFO           3  /* opt - extra tit-bits */
 BIO_CTRL_INFO = 3
 
-#define BIO_reset(b)            (int)BIO_ctrl(b,BIO_CTRL_RESET,0,NULL)
+# define BIO_reset(b)            (int)BIO_ctrl(b,BIO_CTRL_RESET,0,NULL)
+
+
 def BIO_reset(b):
     return BIO_ctrl(b, BIO_CTRL_RESET, 0, None)
 
-##define BIO_get_mem_data(b,pp)  BIO_ctrl(b,BIO_CTRL_INFO,0,(char *)pp)
+# #define BIO_get_mem_data(b,pp)  BIO_ctrl(b,BIO_CTRL_INFO,0,(char *)pp)
+
+
 def BIO_get_mem_data(b, pp):
     return BIO_ctrl(b, BIO_CTRL_INFO, 0, pp)
+
 
 # int    BIO_free(BIO *a)
 BIO_free = _eay.BIO_free
 BIO_free.argtypes = [c_void_p]
 BIO_free.restype = c_int
-def BIO_free_errcheck(result, func, arguments):
+
+
+def BIO_free_errcheck(result, _func, _arguments):
     if result == 0:
         raise SSLError('Unable to free BIO')
+
+
 BIO_free.errcheck = BIO_free_errcheck
 
-#RSA *PEM_read_bio_RSAPrivateKey(BIO *bp, RSA **x,
+# RSA *PEM_read_bio_RSAPrivateKey(BIO *bp, RSA **x,
 #                                        pem_password_cb *cb, void *u);
 PEM_read_bio_RSAPrivateKey = _eay.PEM_read_bio_RSAPrivateKey
 PEM_read_bio_RSAPrivateKey.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p]
 PEM_read_bio_RSAPrivateKey.restype = c_void_p
 
-#RSA *PEM_read_bio_RSAPublicKey(BIO *bp, RSA **x,
+# RSA *PEM_read_bio_RSAPublicKey(BIO *bp, RSA **x,
 #                                        pem_password_cb *cb, void *u);
 PEM_read_bio_RSAPublicKey = _eay.PEM_read_bio_RSAPublicKey
 PEM_read_bio_RSAPublicKey.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p]
 PEM_read_bio_RSAPublicKey.restype = c_void_p
 
-#int PEM_write_bio_RSAPrivateKey(BIO *bp, RSA *x, const EVP_CIPHER *enc,
+# int PEM_write_bio_RSAPrivateKey(BIO *bp, RSA *x, const EVP_CIPHER *enc,
 #                                        unsigned char *kstr, int klen,
 #                                        pem_password_cb *cb, void *u);
 PEM_write_bio_RSAPrivateKey = _eay.PEM_write_bio_RSAPrivateKey
 PEM_write_bio_RSAPrivateKey.argtypes = [c_void_p, c_void_p, c_void_p, c_char_p, c_int, c_void_p, c_void_p]
 PEM_write_bio_RSAPrivateKey.restype = c_int
 
-#int PEM_write_bio_RSAPublicKey(BIO *bp, RSA *x);
+# int PEM_write_bio_RSAPublicKey(BIO *bp, RSA *x);
 PEM_write_bio_RSAPublicKey = _eay.PEM_write_bio_RSAPublicKey
 PEM_write_bio_RSAPublicKey.argtypes = [c_void_p, c_void_p]
 PEM_write_bio_RSAPublicKey.restype = c_int
 
-#int RSA_private_encrypt(int flen, unsigned char *from,
+# int RSA_private_encrypt(int flen, unsigned char *from,
 #    unsigned char *to, RSA *rsa,int padding);
 RSA_private_encrypt = _eay.RSA_private_encrypt
 RSA_private_encrypt.argtypes = [c_int, c_void_p, c_void_p, c_void_p, c_int]
 RSA_private_encrypt.restype = c_int
 
-#int RSA_public_decrypt(int flen, unsigned char *from,
+# int RSA_public_decrypt(int flen, unsigned char *from,
 #   unsigned char *to, RSA *rsa, int padding);
 RSA_public_decrypt = _eay.RSA_public_decrypt
 RSA_public_decrypt.argtypes = [c_int, c_void_p, c_void_p, c_void_p, c_int]
@@ -119,18 +129,19 @@ RSA_size = _eay.RSA_size
 RSA_size.argtypes = [c_void_p]
 RSA_size.restype = c_int
 
-#RSA *RSA_generate_key(int num, unsigned long e,
+# RSA *RSA_generate_key(int num, unsigned long e,
 #    void (*callback)(int,int,void *), void *cb_arg);
 RSA_generate_key = _eay.RSA_generate_key
 RSA_generate_key.argtypes = [c_int, c_ulong, c_void_p, c_void_p]
 RSA_generate_key.restype = c_void_p
 
-##define RSA_F4  0x10001L
+# #define RSA_F4  0x10001L
 RSA_F4 = 0x10001
 
 # void RSA_free(RSA *rsa);
 RSA_free = _eay.RSA_free
 RSA_free.argtypes = [c_void_p]
+
 
 class Key(object):
     """An OpenSSL RSA key."""
@@ -144,7 +155,9 @@ class Key(object):
             # PEM formatted text
             self.raw = fp
         elif isinstance(fp, str):
-            self.raw = open(fp, 'rb').read()
+            # filename with path to PEM file
+            with open(fp, 'rb') as infile:
+                self.raw = infile.read()
         else:
             self.raw = fp.read()
         self._load_key()

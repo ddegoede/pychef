@@ -1,9 +1,10 @@
-import collections
+from collections.abc import Sequence
 import copy
 from urllib.parse import urlencode
 
 from chef.api import ChefAPI
 from chef.base import ChefQuery, ChefObject
+
 
 class SearchRow(dict):
     """A single row in a search result."""
@@ -15,21 +16,21 @@ class SearchRow(dict):
 
     @property
     def object(self):
-        if self._object is  None:
+        if self._object is None:
             # Decode Chef class name
             chef_class = self.get('json_class', '')
             if chef_class.startswith('Chef::'):
                 chef_class = chef_class[6:]
             if chef_class == 'ApiClient':
-                chef_class = 'Client' # Special case since I don't match the Ruby name.
+                chef_class = 'Client'  # Special case since I don't match the Ruby name.
             cls = ChefObject.types.get(chef_class.lower())
             if not cls:
-                raise ValueError('Unknown class %s'%chef_class)
+                raise ValueError('Unknown class %s' % chef_class)
             self._object = cls.from_search(self, api=self.api)
         return self._object
 
 
-class Search(collections.abc.Sequence):
+class Search(Sequence):
     """A search of the Chef index.
 
     The only required argument is the index name to search (eg. node, role, etc).
@@ -120,7 +121,7 @@ class Search(collections.abc.Sequence):
         for i, row in enumerate(self):
             if row.object.name == name:
                 return i
-        raise ValueError('%s not in search'%name)
+        raise ValueError('%s not in search' % name)
 
     def __call__(self, query):
         return self.query(query)

@@ -1,9 +1,10 @@
-from unittest2 import TestCase, skip
+from unittest import TestCase
 
 from chef import Node
 from chef.exceptions import ChefError
 from chef.node import NodeAttributes
-from chef.tests import ChefTestCase
+from chef.tests import TestChef
+
 
 class NodeAttributeTestCase(TestCase):
     def test_getitem(self):
@@ -18,8 +19,8 @@ class NodeAttributeTestCase(TestCase):
         self.assertEqual(data['a'], 2)
 
     def test_getitem_nested(self):
-         attrs = NodeAttributes([{'a': {'b': 1}}])
-         self.assertEqual(attrs['a']['b'], 1)
+        attrs = NodeAttributes([{'a': {'b': 1}}])
+        self.assertEqual(attrs['a']['b'], 1)
     
     def test_set_nested(self):
         data = {'a': {'b': 1}}
@@ -54,7 +55,7 @@ class NodeAttributeTestCase(TestCase):
     def test_getitem_keyerror(self):
         attrs = NodeAttributes([{'a': 1}])
         with self.assertRaises(KeyError):
-            attrs['b']
+            attrs['a'] = attrs['b']
 
     def test_iter(self):
         attrs = NodeAttributes([{'a': 1, 'b': 2}])
@@ -99,7 +100,7 @@ class NodeAttributeTestCase(TestCase):
         self.assertEqual(data['a']['c']['d'], 2)
 
 
-class NodeTestCase(ChefTestCase):
+class NodeTestCase(TestChef):
     def setUp(self):
         super(NodeTestCase, self).setUp()
         self.node = Node('test_1')

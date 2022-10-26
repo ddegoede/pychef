@@ -6,6 +6,7 @@ import socket
 import subprocess
 import threading
 import urllib
+from urllib.parse import urlparse
 import weakref
 
 import pkg_resources
@@ -26,6 +27,7 @@ require 'chef'
 Chef::Config.from_file('%s')
 puts Chef::Config.configuration.to_json
 """.strip()
+
 
 def api_stack_value():
     if not hasattr(api_stack, 'value'):
@@ -86,50 +88,52 @@ class ChefAPI(object):
             return
         url = key_path = client_name = None
         ssl_verify = True
-        for line in open(path):
-            if not line.strip() or line.startswith('#'):
-                continue # Skip blanks and comments
-            parts = line.split(None, 1)
-            if len(parts) != 2:
-                continue # Not a simple key/value, we can't parse it anyway
-            key, value = parts
-            md = cls.ruby_string_re.search(value)
-            if md:
-                value = md.group(2)
-            elif key == 'ssl_verify_mode':
-                log.debug('Found ssl_verify_mode: %r', value)
-                ssl_verify = (value.strip() != ':verify_none')
-                log.debug('ssl_verify = %s', ssl_verify)
-            else:
-                # Not a string, don't even try
-                log.debug('Value for {0} does not look like a string: {1}'.format(key, value))
-                continue
-            def _ruby_value(match):
-                expr = match.group(1).strip()
-                if expr == 'current_dir':
-                    return os.path.dirname(path)
-                envmatch = cls.env_value_re.match(expr)
-                if envmatch:
-                    envmatch = envmatch.group(1).strip('"').strip("'")
-                    return os.environ.get(envmatch) or ''
-                log.debug('Unknown ruby expression in line "%s"', line)
-                raise UnknownRubyExpression
-            try:
-                value = cls.ruby_value_re.sub(_ruby_value, value)
-            except UnknownRubyExpression:
-                continue
-            if key == 'chef_server_url':
-                log.debug('Found URL: %r', value)
-                url = value
-            elif key == 'node_name':
-                log.debug('Found client name: %r', value)
-                client_name = value
-            elif key == 'client_key':
-                log.debug('Found key path: %r', value)
-                key_path = value
-                if not os.path.isabs(key_path):
-                    # Relative paths are relative to the config file
-                    key_path = os.path.abspath(os.path.join(os.path.dirname(path), key_path))
+        with open(path) as infile:
+            for line in infile:
+                if not line.strip() or line.startswith('#'):
+                    continue  # Skip blanks and comments
+                parts = line.split(None, 1)
+                if len(parts) != 2:
+                    continue  # Not a simple key/value, we can't parse it anyway
+                key, value = parts
+                md = cls.ruby_string_re.search(value)
+                if md:
+                    value = md.group(2)
+                elif key == 'ssl_verify_mode':
+                    log.debug('Found ssl_verify_mode: %r', value)
+                    ssl_verify = (value.strip() != ':verify_none')
+                    log.debug('ssl_verify = %s', ssl_verify)
+                else:
+                    # Not a string, don't even try
+                    log.debug('Value for {0} does not look like a string: {1}'.format(key, value))
+                    continue
+
+                def _ruby_value(match):
+                    expr = match.group(1).strip()
+                    if expr == 'current_dir':
+                        return os.path.dirname(path)
+                    envmatch = cls.env_value_re.match(expr)
+                    if envmatch:
+                        envmatch = envmatch.group(1).strip('"').strip("'")
+                        return os.environ.get(envmatch) or ''
+                    log.debug('Unknown ruby expression in line "%s"', line)
+                    raise UnknownRubyExpression
+                try:
+                    value = cls.ruby_value_re.sub(_ruby_value, value)
+                except UnknownRubyExpression:
+                    continue
+                if key == 'chef_server_url':
+                    log.debug('Found URL: %r', value)
+                    url = value
+                elif key == 'node_name':
+                    log.debug('Found client name: %r', value)
+                    client_name = value
+                elif key == 'client_key':
+                    log.debug('Found key path: %r', value)
+                    key_path = value
+                    if not os.path.isabs(key_path):
+                        # Relative paths are relative to the config file
+                        key_path = os.path.abspath(os.path.join(os.path.dirname(path), key_path))
 
         if not (url and client_name and key_path):
             # No URL, no chance this was valid, try running Ruby
@@ -185,7 +189,7 @@ class ChefAPI(object):
         api_stack_value().append(weakref.ref(self))
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exception_type, exception_value, exception_traceback):
         del api_stack_value()[-1]
 
     def _request(self, method, url, data, headers):
@@ -193,9 +197,9 @@ class ChefAPI(object):
 
     def request(self, method, path, headers={}, data=None):
         auth_headers = sign_request(key=self.key, http_method=method,
-            path=self.parsed_url.path+path.split('?', 1)[0], body=data,
-            host=self.parsed_url.netloc, timestamp=datetime.datetime.utcnow(),
-            user_id=self.client)
+                                    path=self.parsed_url.path+path.split('?', 1)[0], body=data,
+                                    host=self.parsed_url.netloc, timestamp=datetime.datetime.utcnow(),
+                                    user_id=self.client)
         request_headers = {}
         request_headers.update(self.headers)
         request_headers.update(dict((k.lower(), v) for k, v in headers.items()))
@@ -208,7 +212,6 @@ class ChefAPI(object):
             raise ChefServerError(str(e))
         except requests.Timeout as e:
             raise ChefServerError(e)
-
 
         if not response.ok:
             raise ChefServerError.from_error(response.reason, code=response.status_code)

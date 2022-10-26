@@ -1,14 +1,13 @@
 from __future__ import absolute_import
 import types
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
+
 
 def maybe_call(x):
     if callable(x):
         return x()
     return x
+
 
 class JSONEncoder(json.JSONEncoder):
     """Custom encoder to allow arbitrary classes."""
@@ -21,6 +20,7 @@ class JSONEncoder(json.JSONEncoder):
         elif isinstance(obj, types.GeneratorType):
             return list(obj)
         return super(JSONEncoder, self).default(obj)
+
 
 loads = json.loads
 dumps = lambda obj, **kwargs: json.dumps(obj, cls=JSONEncoder, **kwargs)

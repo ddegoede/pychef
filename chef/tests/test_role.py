@@ -1,8 +1,8 @@
 from chef import Role
-from chef.exceptions import ChefError
-from chef.tests import ChefTestCase
+from chef.tests import TestChef
 
-class RoleTestCase(ChefTestCase):
+
+class RoleTestCase(TestChef):
     def test_get(self):
         r = Role('test_1')
         self.assertTrue(r.exists)
